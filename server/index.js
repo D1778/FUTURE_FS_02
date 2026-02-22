@@ -11,7 +11,6 @@ app.get('/', (req, res) => {
   res.json({ message: 'LeadPilot server is running!' });
 });
 
-// Log all env variables to check they're loaded
 console.log('DB_HOST:', process.env.DB_HOST);
 console.log('DB_PORT:', process.env.DB_PORT);
 console.log('DB_NAME:', process.env.DB_NAME);
@@ -27,13 +26,13 @@ sequelize
     return sequelize.sync({ alter: true });
   })
   .then(() => {
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+    app.use('/api/auth',  require('./routes/auth'));
+    app.use('/api/leads', require('./routes/leads'));
   })
   .catch((err) => {
-    console.error('❌ MySQL connection failed:', err.message);
+    console.error('❌ Full error:', err);
     process.exit(1);
   });
-
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/leads', require('./routes/leads')); 
