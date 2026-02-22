@@ -4,7 +4,13 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://leadpilot-frontend-szk8.onrender.com'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -29,7 +35,7 @@ sequelize
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
-    app.use('/api/auth',  require('./routes/auth'));
+    app.use('/api/auth', require('./routes/auth'));
     app.use('/api/leads', require('./routes/leads'));
   })
   .catch((err) => {
