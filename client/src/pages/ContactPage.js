@@ -77,7 +77,6 @@ export default function ContactPage() {
               <input
                 type="text"
                 name="name"
-                placeholder="John Doe"
                 value={form.name}
                 onChange={handleChange}
                 required
@@ -88,7 +87,6 @@ export default function ContactPage() {
               <input
                 type="email"
                 name="email"
-                placeholder="john@example.com"
                 value={form.email}
                 onChange={handleChange}
                 required
@@ -102,7 +100,6 @@ export default function ContactPage() {
               <input
                 type="tel"
                 name="phone"
-                placeholder="+1 234 567 890"
                 value={form.phone}
                 onChange={handleChange}
               />
@@ -128,7 +125,6 @@ export default function ContactPage() {
             <label>Message</label>
             <textarea
               name="message"
-              placeholder="Tell us about your project or inquiry..."
               value={form.message}
               onChange={handleChange}
               rows="4"
