@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const { sequelize } = require('./models');
+
 const app = express();
 
 app.use(cors({
@@ -14,7 +16,15 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ── Routes ── (moved outside sequelize block)
+let dbReady = false;
+app.use('/api', (req, res, next) => {
+  if (!dbReady) {
+    return res.status(503).json({ message: 'Server is starting, please try again in a moment.' });
+  }
+  next();
+});
+
+// ── Routes ──
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/leads', require('./routes/leads'));
 
@@ -22,21 +32,21 @@ app.get('/', (req, res) => {
   res.json({ message: 'LeadPilot server is running!' });
 });
 
-const { sequelize } = require('./models');
 const PORT = process.env.PORT || 5000;
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('✅ MySQL connected successfully');
-    return sequelize.sync({ alter: true });
-  })
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('❌ Full error:', err);
-    process.exit(1);
-  });
+// Start listening immediately so requests are answered (instead of hanging or
+// being refused) while the database connects; retry the DB connection on failure.
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('✅ Database connected successfully');
+    await sequelize.sync({ alter: true });
+    dbReady = true;
+  } catch (err) {
+    console.error('❌ Database connection failed, retrying in 5s:', err.message);
+    setTimeout(connectDB, 5000);
+  }
+};
+connectDB();
