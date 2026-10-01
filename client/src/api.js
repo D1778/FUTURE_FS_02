@@ -10,4 +10,16 @@ API.interceptors.request.use(req => {
   return req;
 });
 
+API.interceptors.response.use(
+  res => res,
+  err => {
+    if (err.response?.status === 401 && window.location.pathname !== '/login') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      window.location.replace('/login');
+    }
+    return Promise.reject(err);
+  }
+);
+
 export default API;
