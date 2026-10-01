@@ -26,7 +26,14 @@ router.post('/register', async (req, res) => {
 // ─── LOGIN ───
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+    if (!process.env.JWT_SECRET) {
+      console.error('JWT_SECRET is not set');
+      return res.status(500).json({ message: 'Server misconfigured: JWT_SECRET missing' });
+    }
 
     // Find user
     const user = await User.findOne({ where: { username } });

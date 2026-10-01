@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+  timeout: 90000 // Render free tier can take ~60s to wake up
 });
 
 API.interceptors.request.use(req => {
@@ -9,5 +10,17 @@ API.interceptors.request.use(req => {
   if (token) req.headers.Authorization = `Bearer ${token}`;
   return req;
 });
+
+API.interceptors.response.use(
+  res => res,
+  err => {
+    if (err.response?.status === 401 && window.location.pathname !== '/login') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      window.location.replace('/login');
+    }
+    return Promise.reject(err);
+  }
+);
 
 export default API;

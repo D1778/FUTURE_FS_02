@@ -20,7 +20,13 @@ export default function LoginPage() {
       localStorage.setItem('username', data.username);
       navigate('/');
     } catch (err) {
-      setError('Invalid username or password');
+      if (err.response && [400, 401].includes(err.response.status)) {
+        setError('Invalid username or password');
+      } else if (err.response) {
+        setError(err.response.data?.message || 'Server error. Please try again.');
+      } else {
+        setError('Cannot reach the server. It may be waking up - please try again in a minute.');
+      }
     } finally {
       setLoading(false);
     }
