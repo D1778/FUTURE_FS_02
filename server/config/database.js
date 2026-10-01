@@ -3,6 +3,11 @@ require('dotenv').config();
 
 let sequelize;
 
+// Managed MySQL providers (Aiven, TiDB, PlanetScale, ...) usually require TLS.
+// Set DB_SSL=true on the host to enable it.
+const useSSL = /^(true|1|require)$/i.test(process.env.DB_SSL || '');
+const mysqlSSL = useSSL ? { ssl: { rejectUnauthorized: false } } : {};
+
 if (process.env.DATABASE_URL) {
   // Hosted (e.g. Render Postgres) connection string
   const isPostgres = /^postgres/i.test(process.env.DATABASE_URL);
@@ -11,7 +16,7 @@ if (process.env.DATABASE_URL) {
     logging: false,
     dialectOptions: isPostgres
       ? { ssl: { require: true, rejectUnauthorized: false }, connectTimeout: 15000 }
-      : { connectTimeout: 15000 }
+      : { connectTimeout: 15000, ...mysqlSSL }
   });
 } else {
   sequelize = new Sequelize(
@@ -24,7 +29,8 @@ if (process.env.DATABASE_URL) {
       dialect: 'mysql',
       logging: false,
       dialectOptions: {
-        connectTimeout: 15000
+        connectTimeout: 15000,
+        ...mysqlSSL
       }
     }
   );
